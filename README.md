@@ -1,4 +1,4 @@
-![AniCart Banner](./frontend/public/images/bg.png)
+![AniCart Banner](./frontend/public/images/banner.png)
 
 # 🎬 AniCart - The Ultimate Anime Streaming Platform
 
@@ -22,13 +22,15 @@ Welcome to **AniCart**, a commercial-grade, multi-language microservice ecosyste
 
 ---
 
-## 🏗 High-Performance Polyglot Microservices Architecture
+## 🏗 High-Performance Polyglot Architecture
 
-AniCart is engineered using a state-of-the-art Polyglot Microservices architecture. This means different components of the system are written in entirely different programming languages, optimized specifically for their respective tasks.
+AniCart is engineered using a state-of-the-art Polyglot Microservices architecture, split into specialized domains. Below are detailed visualizations of our system logic.
+
+### 1. Global System Topology
+This diagram illustrates how the core technologies physically interface across the network.
 
 ```mermaid
 graph TB
-    %% Styling
     classDef frontend fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff,rx:10px,ry:10px
     classDef backend fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff,rx:10px,ry:10px
     classDef ai fill:#8b5cf6,stroke:#6d28d9,stroke-width:2px,color:#fff,rx:10px,ry:10px
@@ -36,101 +38,162 @@ graph TB
     classDef rust fill:#f97316,stroke:#c2410c,stroke-width:2px,color:#fff,rx:10px,ry:10px
     classDef db fill:#475569,stroke:#334155,stroke-width:2px,color:#fff,rx:10px,ry:10px
 
-    subgraph User Interaction Layer
+    User[End User / Browser] --> UI
+    
+    subgraph Client-Side [Vite React Engine - Port 3000]
         direction LR
-        UI["💻 React 19 UI\n(Vite + TailwindCSS)"]:::frontend
-        Router["🛣️ React Router\n(Client-side Navigation)"]:::frontend
-        UI <--> Router
+        UI["💻 React 19 UI"]:::frontend
+        Router["🛣️ React Router"]:::frontend
     end
 
-    subgraph Core API Services
-        API["⚙️ Node.js Monolith\n(Express REST API)"]:::backend
+    subgraph Node.js Core [Express Monolith - Port 5000]
+        API["⚙️ Node Express API"]:::backend
         Prisma["🔗 Prisma ORM Layer"]:::backend
-        Auth["🔑 JWT Auth Gateway"]:::backend
-        SQLite[("🗄️ SQLite Database\n(dev.db)")]:::db
-        
+        Auth["🔑 JWT Middleware"]:::backend
+        SQLite[("🗄️ SQLite\n(dev.db)")]:::db
         API --> Auth
         API --> Prisma
         Prisma --> SQLite
     end
 
-    subgraph Deep Learning Engine
-        FastAPI["🐍 Python FastAPI\n(High-Performance API)"]:::ai
-        Groq["🧠 Groq Llama-3 API\n(LLM Inference)"]:::ai
-        
+    subgraph AI Processing [FastAPI Service - Port 8000]
+        FastAPI["🐍 Python FastAPI"]:::ai
+        Groq["🧠 Groq Llama-3 API"]:::ai
         FastAPI <--> Groq
     end
 
-    subgraph High-Frequency Telemetry
-        Gin["🐹 Go Gin Server\n(Analytics Logging)"]:::go
+    subgraph Telemetry [Go Microservice - Port 8080]
+        Gin["🐹 Go Gin Server"]:::go
     end
 
-    subgraph WASM Integration
-        Rust["🦀 Rust WebAssembly\n(Lightning Fast Search)"]:::rust
-    end
-
-    %% Network Routing
-    UI =="1. Fetches Catalog & Auth\n(JSON via HTTP)"==> API
-    UI =="2. Natural Language Requests\n(CORS + REST)"==> FastAPI
-    UI -. "3. Asynchronous Telemetry\n(Click Tracking)" .-> Gin
-    UI -. "4. Client-side Execution" .-> Rust
+    UI == "Auth/Catalog (HTTP)" ==> API
+    UI == "Natural Language (CORS)" ==> FastAPI
+    UI -. "Async Clicks" .-> Gin
 ```
 
-### Architectural Breakdown
-- **Frontend (JavaScript/React)**: Handles the complex, state-heavy interactive views required for streaming and browsing.
-- **Backend (JavaScript/Node.js)**: Acts as the primary orchestrator, managing database state via Prisma and securely generating JSON Web Tokens.
-- **AI Service (Python/FastAPI)**: Python is the undisputed king of AI. We isolated the Groq Llama-3 LLM calls into a specialized FastAPI server so it scales independently from the Node API.
-- **Telemetry (Go/Gin)**: Go is utilized for its legendary concurrent performance. When thousands of users click buttons, the lightweight Go microservice catches those telemetry events without slowing down the core API.
-- **Search Engine (Rust/WASM)**: By compiling Rust down to WebAssembly, the browser can execute complex search algorithms at near-native C++ speeds.
+### 2. Authorization & Security Flow
+This diagram details the lifecycle of a secure, authenticated request from a user.
+
+```mermaid
+sequenceDiagram
+    participant U as User Browser
+    participant R as React Frontend
+    participant A as Express Gateway
+    participant D as SQLite DB
+
+    U->>R: Enters Credentials
+    R->>A: POST /api/login {email, password}
+    A->>D: Find User Record
+    D-->>A: User Hash Returned
+    A->>A: bcrypt.compare()
+    alt Match Successful
+        A->>A: Generate JWT Header + Payload + Secret
+        A-->>R: Returns 200 OK & Token
+        R->>R: localStorage.setItem('token', jwt)
+        R-->>U: Unlocks Premium Catalog
+    else Match Failed
+        A-->>R: Returns 401 Unauthorized
+        R-->>U: Renders Error Toast
+    end
+```
+
+### 3. AI Guru Recommendation Pipeline
+This illustrates the microservice communication during a Natural Language search.
+
+```mermaid
+flowchart LR
+    classDef ai fill:#8b5cf6,stroke:#6d28d9,stroke-width:2px,color:#fff,rx:10px,ry:10px
+    classDef db fill:#475569,stroke:#334155,stroke-width:2px,color:#fff,rx:10px,ry:10px
+
+    Input[User Types:\n'I want a ninja show'] --> UI[React Component]
+    UI -- "POST /api/chat" --> Fast[Python FastAPI]:::ai
+    Fast -- "Construct System Prompt" --> Groq[Groq LLM Engine]:::ai
+    Groq -- "Neural Inference" --> Output[Returns 'Naruto']:::ai
+    Output -- "JSON Response" --> UI
+    UI -- "Fetch Metadata" --> DB[(Node DB)]:::db
+    DB -- "Poster & Details" --> UserView[Render UI Cards]
+```
 
 ---
 
 ## 🚀 Deployment & Local Setup Guide
 
-Follow these steps to deploy the entire microservice ecosystem locally.
+AniCart supports local deployment on Windows, macOS, and Linux. Choose your operating system below to begin.
 
 ### 1. Clone the Repository
+Open your terminal and pull the ultimate AniCart repository:
 ```bash
-git clone https://github.com/yourusername/anicart-streaming-platform.git
+git clone https://github.com/Neelanjan2448040/anicart-streaming-platform.git
 cd anicart-streaming-platform
 ```
 
-### 2. Configure the Node.js Backend & Database
-The backend handles authentication, movie storage, and the Prisma ORM.
+### 2. Install Node.js Backend & Database
+*Prerequisite: Ensure [Node.js (v20+)](https://nodejs.org/) is installed on your machine.*
+
+**For Windows (PowerShell):**
+```powershell
+cd backend
+npm install
+npx prisma generate
+npx prisma db push
+node prisma/seed.js
+npm run dev
+```
+
+**For macOS / Linux (Bash/Zsh):**
 ```bash
 cd backend
 npm install
 npx prisma generate
 npx prisma db push
-node prisma/seed.js   # Seeds the initial anime database and default admin!
-npm run dev           # Starts API server on http://localhost:5000
+node prisma/seed.js
+npm run dev
 ```
+
 > **Default Admin Credentials:** `admin@anicart.com` / `admin`
 
-### 3. Configure the Python AI Microservice
-The AI Guru requires Python 3.10+ and a valid Groq API key to process natural language.
-```bash
+### 3. Install Python AI Microservice
+*Prerequisite: Ensure [Python (3.10+)](https://python.org/) is installed.*
+
+**For Windows (PowerShell):**
+```powershell
+# Open a new terminal window
 cd ai_service
-pip install fastapi uvicorn groq pydantic cors
-# Start the FastAPI server
+pip install -r requirements.txt
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-### 4. Configure the Go Analytics Microservice (Optional)
-The Go service tracks high-frequency telemetry (e.g., Subscription Clicks).
+**For macOS / Linux (Bash/Zsh):**
 ```bash
+# Open a new terminal window
+cd ai_service
+pip3 install -r requirements.txt
+python3 -m uvicorn main:app --host 0.0.0.0 --port 8000
+```
+> *Note: For production AI, you can export your custom `GROQ_API_KEY` into your environment variables.*
+
+### 4. Install Go Analytics Microservice (Optional)
+*Prerequisite: Ensure [Go (1.21+)](https://go.dev/) is installed.*
+
+**For Windows / macOS / Linux:**
+```bash
+# Open a new terminal window
 cd analytics_service
 go mod tidy
-go run main.go        # Starts Gin server on http://localhost:8080
+go run main.go
 ```
 
 ### 5. Build and Launch the React Frontend
-Finally, boot up the beautiful UI!
+*This must be running to view the website.*
+
+**For Windows / macOS / Linux:**
 ```bash
+# Open a new terminal window
 cd frontend
 npm install
-npm run dev -- --port 3000  # Starts Vite on http://localhost:3000
+npm run dev -- --port 3000
 ```
+**Access the platform:** Navigate to `http://localhost:3000` in your browser!
 
 ---
 
