@@ -47,4 +47,4 @@ jobs:
         go build -o analytics
 
     - name: Verify Docker Compose Build
-      run: docker-compose build
+      run: docker compose build
