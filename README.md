@@ -1,3 +1,5 @@
+![AniCart Banner](./frontend/public/images/bg.png)
+
 # 🎬 AniCart - The Ultimate Anime Streaming Platform
 
 Welcome to **AniCart**, a commercial-grade, multi-language microservice ecosystem designed to deliver an unparalleled Anime streaming and discovery experience. It seamlessly blends modern React UIs, intelligent AI recommendation engines, robust analytics, and secure administrative controls into one magnificent application.
@@ -20,63 +22,66 @@ Welcome to **AniCart**, a commercial-grade, multi-language microservice ecosyste
 
 ---
 
-## 🏗 Polyglot Microservices Architecture
+## 🏗 High-Performance Polyglot Microservices Architecture
 
-AniCart employs a highly advanced, multi-language architecture to distribute workloads efficiently across specialized services.
+AniCart is engineered using a state-of-the-art Polyglot Microservices architecture. This means different components of the system are written in entirely different programming languages, optimized specifically for their respective tasks.
 
 ```mermaid
-graph TD
-    %% Frontend Layer
-    subgraph Frontend [React Frontend Application]
-        UI[Vite React Application\nPort: 3000]
-        Router[React Router DOM]
-        Tailwind[TailwindCSS Styling]
-        
-        UI --> Router
-        UI --> Tailwind
+graph TB
+    %% Styling
+    classDef frontend fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff,rx:10px,ry:10px
+    classDef backend fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff,rx:10px,ry:10px
+    classDef ai fill:#8b5cf6,stroke:#6d28d9,stroke-width:2px,color:#fff,rx:10px,ry:10px
+    classDef go fill:#06b6d4,stroke:#0e7490,stroke-width:2px,color:#fff,rx:10px,ry:10px
+    classDef rust fill:#f97316,stroke:#c2410c,stroke-width:2px,color:#fff,rx:10px,ry:10px
+    classDef db fill:#475569,stroke:#334155,stroke-width:2px,color:#fff,rx:10px,ry:10px
+
+    subgraph User Interaction Layer
+        direction LR
+        UI["💻 React 19 UI\n(Vite + TailwindCSS)"]:::frontend
+        Router["🛣️ React Router\n(Client-side Navigation)"]:::frontend
+        UI <--> Router
     end
 
-    %% Backend Layer
-    subgraph Backend [Node.js Backend Monolith]
-        API[Express REST API\nPort: 5000]
-        Prisma[Prisma ORM Layer]
-        SQLite[(SQLite Database\ndev.db)]
-        Auth[JWT Authentication]
+    subgraph Core API Services
+        API["⚙️ Node.js Monolith\n(Express REST API)"]:::backend
+        Prisma["🔗 Prisma ORM Layer"]:::backend
+        Auth["🔑 JWT Auth Gateway"]:::backend
+        SQLite[("🗄️ SQLite Database\n(dev.db)")]:::db
         
         API --> Auth
         API --> Prisma
         Prisma --> SQLite
     end
 
-    %% Python Microservice
-    subgraph AI_Service [Python AI Service]
-        FastAPI[FastAPI Server\nPort: 8000]
-        Pydantic[Pydantic Validation]
-        Groq[Groq Llama-3 API]
+    subgraph Deep Learning Engine
+        FastAPI["🐍 Python FastAPI\n(High-Performance API)"]:::ai
+        Groq["🧠 Groq Llama-3 API\n(LLM Inference)"]:::ai
         
-        FastAPI --> Pydantic
-        FastAPI --> Groq
+        FastAPI <--> Groq
     end
 
-    %% Go Microservice
-    subgraph Analytics_Service [Go Telemetry Service]
-        Gin[Gin Web Server\nPort: 8080]
-        Logger[Event Logger]
-        
-        Gin --> Logger
+    subgraph High-Frequency Telemetry
+        Gin["🐹 Go Gin Server\n(Analytics Logging)"]:::go
     end
 
-    %% Rust WASM Module
-    subgraph Search_Engine [Rust WASM Engine]
-        WASM[Compiled WASM Binary\nHigh-Speed Search]
+    subgraph WASM Integration
+        Rust["🦀 Rust WebAssembly\n(Lightning Fast Search)"]:::rust
     end
 
-    %% System Connections
-    UI -- "REST Fetch (Movies/Auth)" --> API
-    UI -- "Natural Language Search" --> FastAPI
-    UI -- "Track Clicks/Events" --> Gin
-    UI -- "Fast Local Search" --> WASM
+    %% Network Routing
+    UI =="1. Fetches Catalog & Auth\n(JSON via HTTP)"==> API
+    UI =="2. Natural Language Requests\n(CORS + REST)"==> FastAPI
+    UI -. "3. Asynchronous Telemetry\n(Click Tracking)" .-> Gin
+    UI -. "4. Client-side Execution" .-> Rust
 ```
+
+### Architectural Breakdown
+- **Frontend (JavaScript/React)**: Handles the complex, state-heavy interactive views required for streaming and browsing.
+- **Backend (JavaScript/Node.js)**: Acts as the primary orchestrator, managing database state via Prisma and securely generating JSON Web Tokens.
+- **AI Service (Python/FastAPI)**: Python is the undisputed king of AI. We isolated the Groq Llama-3 LLM calls into a specialized FastAPI server so it scales independently from the Node API.
+- **Telemetry (Go/Gin)**: Go is utilized for its legendary concurrent performance. When thousands of users click buttons, the lightweight Go microservice catches those telemetry events without slowing down the core API.
+- **Search Engine (Rust/WASM)**: By compiling Rust down to WebAssembly, the browser can execute complex search algorithms at near-native C++ speeds.
 
 ---
 
@@ -107,9 +112,6 @@ The AI Guru requires Python 3.10+ and a valid Groq API key to process natural la
 ```bash
 cd ai_service
 pip install fastapi uvicorn groq pydantic cors
-# Optional: Set your Groq API Key environment variable
-# export GROQ_API_KEY="your_api_key_here"
-
 # Start the FastAPI server
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
@@ -129,13 +131,6 @@ cd frontend
 npm install
 npm run dev -- --port 3000  # Starts Vite on http://localhost:3000
 ```
-
----
-
-## 🔒 Security & Privacy Notice
-
-- **Database Protection**: The `dev.db` SQLite file is ignored via `.gitignore`. Even if you fork or push this repository to GitHub, your users' hashed passwords and data are never uploaded to the public internet.
-- **Environment Variables**: The `.env` files containing sensitive keys (like the `GROQ_API_KEY`) are fully protected and excluded from version control. Never commit these files!
 
 ---
 
